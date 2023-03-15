@@ -56,109 +56,111 @@ class ELF extends Hero {
 
 */
 
-class Character {
-	constructor(hp, damage) {
-		this.hp = hp;
-		this.damage = damage;
-	}
+class Hero {
+	// Field , attr
+	HP_BY_DEFAULT = 100;
+	DAMAGE_BY_DEFAULT = 25;
 
-	attack() {
-		throw new Error('You have to implement the method attack!');
+	constructor(name, damage = this.DAMAGE_BY_DEFAULT, hp = this.HP_BY_DEFAULT) {
+		this.name = name;
+		this.damage = damage;
+		this.hp = hp;
 	}
 }
 
-class Elf extends Character {
-	constructor() {
-		super(110, 10)
+class Elf extends Hero {
+	constructor(name, damage, hp) {
+		super(name, damage, hp);
 	}
-
-	attack() {
-		return this.magicKick()
-	}
-
-	magicKick() {
+	magicAttack() {
 		return this.damage * 2;
 	}
 }
 
-class Archer extends Character {
-	constructor() {
-		super(100, 11)
+class Archer extends Hero {
+	constructor(name, damage, hp) {
+		super(name, damage, hp);
 	}
-
-	attack() {
-		return this.magicArrow();
-	}
-
-	magicArrow() {
-		return this.damage * 2 / 1.2 * .4 * 2.2;
+	magicAttack() {
+		return ((this.damage * 2) / 1.2) * 0.4 * 2.2;
 	}
 }
 
-document.getElementById('start').addEventListener("click", function () {
-	const playerCharType = document.getElementById('character-select').value;
+let isRunning = true;
 
-	console.log('playerCharType:', playerCharType)
-	let human, computer;
+while (isRunning) {
+	const userPick = prompt(`
+		 Hello , enter raice that you wanna pick : 
+		 a) Archer 
+		 b) Elf
+		 q) Quit 
+	`);
 
-	if (playerCharType === 'archer') {
-		human = new Archer();
-		computer = new Elf();
-	}
-	else {
-		human = new Elf();
-		computer = new Archer();
-	}
+	const queue = random();
+	console.log(queue);
 
-	let counter = 1;
-
-	let first, second, dmg, firstType, secondType;
-
-	const gamePlay = document.getElementById('gameplay');
-
-	while (1 === 1) {
-		if (counter === 1) {
-			if (Math.round(Math.random() * 10) % 2 === 0) {
-				firstType = 'Human'
-				secondType = 'Computer'
-				first = human;
-				second = computer;
-				gamePlay.appendChild(document.createTextNode(`${counter}: Human starts`))
-
-			}
-			else {
-				firstType = 'Computer'
-				secondType = 'Human'
-				first = computer;
-				second = human;
-				gamePlay.appendChild(document.createTextNode(`${counter}: Computer starts`))
-			}
-
-			gamePlay.appendChild(document.createElement('br'))
-		}
-
-		dmg = first.attack();
-
-		second.hp -= dmg
-		gamePlay.appendChild(document.createTextNode(`${counter}: ${firstType} damage ${secondType} with -${dmg}`));
-		gamePlay.appendChild(document.createElement('br'))
-
-		if (second.hp <= 0) {
-			gamePlay.appendChild(document.createTextNode(`${counter}: ${firstType} WINS`));
+	switch (userPick.toLowerCase()) {
+		case "a":
+			const archerFirstStarts = whoIsFirstStarts(true);
+			battle(archerFirstStarts, queue);
+			console.log(archerFirstStarts);
 			break;
-		}
-
-		dmg = second.attack();;
-		first.hp -= dmg
-		gamePlay.appendChild(document.createTextNode(`${counter}: ${secondType} damage ${firstType} with -${dmg}`));
-		gamePlay.appendChild(document.createElement('br'))
-
-		if (first.hp <= 0) {
-			gamePlay.appendChild(document.createTextNode(`${counter}: ${firstType} WINS`));
+		case "b":
+			const elfFirstStarts = whoIsFirstStarts(false);
+			battle(elfFirstStarts, queue);
+			console.log(elfFirstStarts);
 			break;
+		case "q":
+			isRunning = false;
+			break;
+
+		default:
+			alert("Try once again!");
+			break;
+	}
+}
+
+function whoIsFirstStarts(isHero) {
+	if (isHero) {
+		return {
+			user: new Archer("John"),
+			machine: new Elf("Robot"),
 		}
 
-		counter++;
-
+	} else {
+		return {
+			user: new Elf("John"),
+			machine: new Archer("Robot"),
+		}
 	}
-});
+}
+console.log(whoIsFirstStarts());
+
+
+function battle(hero, queue) {
+	if (queue === "hero") {
+		while (hero.user.hp > 0 && hero.machine.hp > 0) {
+			attackKick(hero.user, hero.machine);
+		}
+	} else {
+		while (hero.user.hp > 0 && hero.machine.hp > 0) {
+			attackKick(hero.machine, hero.user);
+		}
+	}
+}
+
+function attackKick(firstHero, secondHero) {
+	firstHero.hp -= secondHero.magicAttack();
+	secondHero.hp -= firstHero.magicAttack();
+
+	console.log("[firstHero_HP]", firstHero.hp);
+	console.log("[secondHero_HP]", secondHero.hp);
+}
+
+function random() {
+	const value = Math.random().toString().slice(2, 3);
+
+	if (value % 2) return "hero";
+
+	return "bot";
+}
